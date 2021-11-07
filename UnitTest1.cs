@@ -3,7 +3,16 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Configuration;
 using System.IO;
+using excel = Microsoft.Office.Interop.Excel;
+
+/*
+Thanks for the test, the work turned out not the most beautiful.
+There is still something to work on to improve my abilities
+My first automation in c #
+I did not manage to do a read function from file and reports
+*/
 
 namespace TraderIforexTests
 {
@@ -16,8 +25,9 @@ namespace TraderIforexTests
         {
             try
             {
-
+                //Browser opening function
                 OpenBrowser();
+
             }
             catch(InvalidOperationException ex)
             {
@@ -31,20 +41,32 @@ namespace TraderIforexTests
         {
             try
             {
+                /*
+                Some code that needs to read data from a file, but does not.
+                I'm probably doing something wrong
+                var user = ConfigurationManager.AppSettings["Username"];
+                email.SendKeys(user);
+                var pass = ConfigurationManager.AppSettings["Password"];
+                password.SendKeys(pass);
+                */
+                String user = "test.QAEgypt111@test.com";
                 IWebElement email = driver.FindElement(By.CssSelector("input[name='UserName']"));
-                email.SendKeys("test.QAEgypt111@test.com");
+                email.SendKeys(user);
+                String pass = "wt6f4z1bnx";
                 IWebElement password = driver.FindElement(By.CssSelector("input[name='Password']"));
-                password.SendKeys("wt6f4z1bnx");
+                password.SendKeys(pass);
                 IWebElement elementBtn = driver.FindElement(By.XPath("//*[@id='btnOkLogin']"));
                 elementBtn.Submit();
                 driver.Navigate().Back();
 
                 try
                 {
+                    //Search for a question mark selector and grab text
                     driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(9);
                     IWebElement element = driver.FindElement(By.XPath("//*[@id='lblUname']/i"));
                     String text = element.GetAttribute("title");
                     Console.WriteLine("This is a Text: " + text);
+                    //Function call, file write
                     WriteToTextFile(text);
                 }
                 catch (NoSuchElementException ex)
@@ -60,14 +82,22 @@ namespace TraderIforexTests
 
 
         private void OpenBrowser()
-        {
+        { 
                 driver = new ChromeDriver();
+                /*
+                Some code that needs to read data from a file, but does not.
+                I'm probably doing something wrong
+                driver.Url = ConfigurationManager.AppSettings["URL"];
+                */
                 driver.Url = "https://traderqa1.iforex.com/";
-                driver.Manage().Window.Maximize();
-                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(9));
+            driver.Manage().Window.Maximize();
+
+                //A function that validates the site if loaded in less than 10 seconds
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
                 Func<IWebDriver, bool> waitForElement = new Func<IWebDriver, bool>((IWebDriver Web) =>
                 {
-                    Console.WriteLine("Waiting for visible button Login");
+                    //Waiting for element, visible button
+                    Console.WriteLine("Waiting for visible button - 'Login'");
                     IWebElement element = Web.FindElement(By.XPath("//*[@id='btnOkLogin']"));
                     if (element.GetAttribute("value").Contains("Login"))
                     {
@@ -79,7 +109,7 @@ namespace TraderIforexTests
         }
 
 
-
+        //Function for writing text to a file
         private void WriteToTextFile(String text)
         {
             try
@@ -98,10 +128,11 @@ namespace TraderIforexTests
         }
 
         [TearDown]
+        //Close browser
         public void TearDown()
         {
-            //driver.Close();
-           // driver.Quit();
+           driver.Close();
+           driver.Quit();
         }
     }
 }
